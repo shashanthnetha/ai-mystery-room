@@ -10,14 +10,14 @@ export function buildGeneratedCaseSchema(cfg) {
       title: z.string().trim().min(4, 'title too short').max(90, 'title too long'),
       setting: z.string().trim().min(8, 'setting too short').max(240, 'setting too long'),
       victim: z.string().trim().min(3, 'victim too short').max(90, 'victim too long'),
-      story: z.string().trim().min(400, 'story too short').max(6000, 'story too long'),
+      story: z.string().trim().min(650, 'story too short').max(6000, 'story too long'),
       suspects: z
         .array(
           z.object({
             name: z.string().trim().min(2).max(60),
             role: z.string().trim().min(3).max(60),
-            description: z.string().trim().min(30).max(700),
-            alibi: z.string().trim().min(10).max(400),
+            description: z.string().trim().min(40).max(700),
+            alibi: z.string().trim().min(15).max(400),
           }),
         )
         .length(cfg.suspects, `exactly ${cfg.suspects} suspects required`),
@@ -25,13 +25,13 @@ export function buildGeneratedCaseSchema(cfg) {
         .array(
           z.object({
             title: z.string().trim().min(6).max(80),
-            content: z.string().trim().min(40).max(500),
+            content: z.string().trim().min(60).max(500),
           }),
         )
         .length(cfg.clues, `exactly ${cfg.clues} clues required`),
-      hints: z.array(z.string().trim().min(15).max(300)).length(cfg.hints, `exactly ${cfg.hints} hints required`),
+      hints: z.array(z.string().trim().min(20).max(300)).length(cfg.hints, `exactly ${cfg.hints} hints required`),
       culpritName: z.string().trim().min(2).max(60),
-      solution: z.string().trim().min(120, 'solution too short').max(5000, 'solution too long'),
+      solution: z.string().trim().min(450, 'solution too short').max(5000, 'solution too long'),
     })
     .strip(); // drop any stray keys Gemini may add
 }

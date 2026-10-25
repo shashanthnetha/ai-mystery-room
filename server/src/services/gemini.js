@@ -4,9 +4,38 @@ import { DIFFICULTIES } from '../config/difficulty.js';
 import { buildGeneratedCaseSchema, validateGeneratedLogic } from '../validation/generatedCase.js';
 import { ApiError } from '../utils/errors.js';
 
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+/**
+ * Generation tries these (model, temperature) combos in order —
+ * fast-lane flash first; lite variants keep the oracle alive during
+ * high-demand spikes (503/504).
+ */
+const MODEL_CHAIN = [
+  GEMINI_MODEL,
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+];
+
+const ATTEMPTS = [
+  { temperature: 1.0 },
+  { temperature: 0.9 },
+  { temperature: 0.75 },
+];
+
+let _ai = null;
+function client() {
+  if (!_ai) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new ApiError(
+        502,
+        'The AI oracle is missing from HQ (GEMINI_API_KEY not configured on this server).',
+      );
+    }
+    _ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return _ai;
+}
 
 const SYSTEM_INSTRUCTION = `You are "The Architect" — an award-winning interactive murder-mystery designer. You write tight, immersive, fair-play whodunits for a browser game called AI Mystery Room.
 
@@ -19,7 +48,7 @@ THE FAIR-PLAY CONTRACT (never violate):
 
 STYLE RULES:
 - Family-friendly: no gore, slurs, sexual content, or real people/places. Fictional names and a coherent, atmospheric setting (era/genre may vary: mansion, ship, museum, small town, train, theatre…).
-- The story is vivid but economical (2–4 short paragraphs separated by blank lines).
+- The story is vivid but economical: 3–4 short paragraphs separated by blank lines, ~250–450 words total.
 - Clue content is concrete evidence (physical, testimonial, timing, contradiction) — 2–5 sentences each, never simply "X is the culprit".
 - Hints get progressively more revealing; the last hint may nearly implicate a suspect but never names the culprit outright.
 - Suspect "alibi" is what THEY claim, containing a detail that will be tested by the clues.
@@ -103,17 +132,17 @@ DIFFICULTY: ${cfg.label}
 Return ONLY the structured JSON defined by the schema. Make the mystery feel like it was written by a master author specifically for this premise — weave the premise naturally into the setting.`;
 }
 
-const ATTEMPTS = [
-  { temperature: 1.0 },
-  { temperature: 0.75 },
-  { temperature: 0.5 },
-];
-
 /**
  * Generates a mystery and runs the full validation pipeline.
  * Throws ApiError (400/502/504) — the route layer forwards it to the client.
  */
 export async function generateMystery(premise, difficulty) {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new ApiError(
+      502,
+      'The AI oracle is missing from HQ (GEMINI_API_KEY not configured on this server).',
+    );
+  }
   const cfg = DIFFICULTIES[difficulty];
   const schema = buildGeneratedCaseSchema(cfg);
 
@@ -121,8 +150,8 @@ export async function generateMystery(premise, difficulty) {
 
   for (let i = 0; i < ATTEMPTS.length; i += 1) {
     try {
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
+      const response = await client().models.generateContent({
+        model: MODEL_CHAIN[i],
         contents: userPrompt(premise, cfg),
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
@@ -156,7 +185,7 @@ export async function generateMystery(premise, difficulty) {
         lastReason = err.message;
       } else {
         lastReason = err?.message || String(err);
-        console.warn(`[gemini] attempt ${i + 1} failed: ${lastReason}`);
+        console.warn(`[gemini] attempt ${i + 1} (${MODEL_CHAIN[i]}) failed: ${lastReason}`);
       }
     }
   }

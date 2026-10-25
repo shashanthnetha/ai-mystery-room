@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, FileSearch, Fingerprint, Gavel, Lightbulb, Search, Sparkles, X } from 'lucide-react';
+import { ArrowRight, FileSearch, Fingerprint, Gavel, Lightbulb, Sparkles } from 'lucide-react';
 
 import DifficultyCard from '../components/DifficultyCard.jsx';
 import CaseCard from '../components/CaseCard.jsx';
@@ -26,11 +26,8 @@ const FLOATERS = [
 ];
 
 export default function Home() {
-  const [recents, setRecents] = useState([]);
-
-  useEffect(() => {
-    setRecents(getRecentCases());
-  }, []);
+  // device-local archive; read synchronously (client-only app, no SSR)
+  const [recents, setRecents] = useState(getRecentCases);
 
   const hasRecents = recents.length > 0;
 

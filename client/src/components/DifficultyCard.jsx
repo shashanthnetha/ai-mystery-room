@@ -6,7 +6,7 @@ import { DIFFICULTY_INFO, DIFFICULTY_ORDER } from '../lib/difficulty.js';
  * Difficulty selector card (shared by Create + Home).
  * `selected` is only honoured when `onSelect` is provided (create mode).
  */
-export default function DifficultyCard({ difficulty, selected, onSelect, compact = false }) {
+export default function DifficultyCard({ difficulty, selected, onSelect }) {
   const info = DIFFICULTY_INFO[difficulty];
   if (!info) return null;
   const interactive = typeof onSelect === 'function';

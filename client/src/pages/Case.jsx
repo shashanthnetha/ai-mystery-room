@@ -9,7 +9,7 @@ import ErrorState from '../components/ErrorState.jsx';
 import Stamp from '../components/Stamp.jsx';
 import api, { apiCall, getErrorMessage } from '../lib/api.js';
 import { DIFFICULTY_INFO } from '../lib/difficulty.js';
-import { rememberCase, updateCaseStatus } from '../lib/storage.js';
+import { rememberCase } from '../lib/storage.js';
 
 export default function Case() {
   const { id } = useParams();
@@ -19,6 +19,9 @@ export default function Case() {
   const [loading, setLoading] = useState(true);
   const [discoveringId, setDiscoveringId] = useState(null);
   const [hintBusy, setHintBusy] = useState(false);
+  const [progress, setProgress] = useState({ cluesDiscovered: 0, cluesTotal: 0, hintsUsed: 0, hintsTotal: 0 });
+  const [usedHints, setUsedHints] = useState([]); // local add-ons as hints get revealed
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -49,11 +52,32 @@ export default function Case() {
     };
   }, [id, navigate]);
 
+  // Seed progress/derived state when a case snapshot first arrives.
+  useEffect(() => {
+    if (!data) return;
+    const discovered = data.clues.filter((c) => c.discovered).length;
+    setProgress({
+      cluesDiscovered: discovered,
+      cluesTotal: data.cluesTotal,
+      hintsUsed: data.hintsUsed,
+      hintsTotal: data.hintsTotal,
+    });
+    setUsedHints([]);
+    // This intentionally runs only when a NEW case id loads (not on every clue discovery).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.id]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const t = setTimeout(() => setToast(null), 4600);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const discoverClue = useCallback(
     async (clue) => {
       if (discoveringId || clue.discovered) return;
       setDiscoveringId(clue.id);
-      const [data, err] = await apiCall(api.post(`/cases/${id}/clues/${clue.id}/discover`));
+      const [payload, err] = await apiCall(api.post(`/cases/${id}/clues/${clue.id}/discover`));
       setDiscoveringId(null);
       if (err) {
         setToast(err);
@@ -61,9 +85,9 @@ export default function Case() {
       }
       setData((prev) => ({
         ...prev,
-        clues: prev.clues.map((cl) => (cl.id === clue.id ? { ...cl, ...data.clue } : cl)),
+        clues: prev.clues.map((cl) => (cl.id === clue.id ? { ...cl, ...payload.clue } : cl)),
       }));
-      setProgress((p) => ({ ...p, ...data.progress }));
+      setProgress((p) => ({ ...p, ...payload.progress }));
     },
     [id, discoveringId],
   );
@@ -71,38 +95,15 @@ export default function Case() {
   const requestHint = useCallback(async () => {
     if (hintBusy) return;
     setHintBusy(true);
-    const [data, err] = await apiCall(api.post(`/cases/${id}/hints`));
+    const [payload, err] = await apiCall(api.post(`/cases/${id}/hints`));
     setHintBusy(false);
     if (err) {
       setToast(err);
       return;
     }
-    setProgress((p) => ({ ...p, ...data.progress }));
-    setUsedHints((hs) => [...hs, data.hint.text]);
+    setProgress((p) => ({ ...p, ...payload.progress }));
+    setUsedHints((hs) => [...hs, payload.hint.text]);
   }, [id, hintBusy]);
-
-  // progress + revealed hint texts derived from case + local additions
-  const [progress, setProgress] = useState({ cluesDiscovered: 0, cluesTotal: 0, hintsUsed: 0, hintsTotal: 0 });
-  const [usedHints, setUsedHints] = useState([]);
-  const [toast, setToast] = useState(null);
-
-  useEffect(() => {
-    if (!data) return;
-    const used = data.clues.filter((c) => c.discovered).length;
-    setProgress({
-      cluesDiscovered: used,
-      cluesTotal: data.cluesTotal,
-      hintsUsed: data.hintsUsed,
-      hintsTotal: data.hintsTotal,
-    });
-    setUsedHints([]);
-  }, [data?.id]); // only on load
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4200);
-    return () => clearTimeout(t);
-  }, [toast]);
 
   if (loading) return <CaseSkeleton />;
   if (loadError || !data) {
@@ -119,7 +120,6 @@ export default function Case() {
   }
 
   const info = DIFFICULTY_INFO[data.difficulty] || {};
-  const discovered = data.clues.filter((cl) => cl.discovered);
   const pct = progress.cluesTotal ? Math.round((progress.cluesDiscovered / progress.cluesTotal) * 100) : 0;
 
   return (

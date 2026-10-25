@@ -30,6 +30,6 @@ export function computeScore({ correct, difficulty, cluesDiscovered, hintsUsed }
   const base = correct ? cfg.base : 0;
   const clueBonus = cluesDiscovered * CLUE_BONUS;
   const hintPenalty = hintsUsed * HINT_PENALTY;
-  const total = Math.max(0, base + clueBonus + hintPenalty);
+  const total = Math.max(0, base + clueBonus - hintPenalty);
   return { base, clueBonus, hintPenalty: -hintPenalty, total };
 }

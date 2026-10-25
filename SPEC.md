@@ -26,7 +26,7 @@
 | Layer      | Choice |
 |------------|--------|
 | Frontend   | React 19 + Vite (template `react`), Tailwind CSS v4 (`@tailwindcss/vite`), react-router-dom v7, axios, framer-motion, lucide-react, canvas-confetti |
-| Backend    | Node.js (≥20), Express 5, Mongoose 8 (MongoDB Atlas), zod v4, `@google/genai` SDK → **Gemini 2.5 Flash**, express-rate-limit |
+| Backend    | Node.js (≥20), Express 5, Mongoose 8 (MongoDB Atlas), zod v4, `@google/genai` SDK → **Gemini flash series** (default alias `gemini-flash-latest` with `gemini-3.5-flash-lite` fallbacks), express-rate-limit |
 | Hosting    | Frontend → Vercel · Backend → Render · DB → MongoDB Atlas (M0 free) |
 
 No other libraries are required. No secrets ever live in the frontend.
@@ -188,7 +188,7 @@ Errors: `400` unknown suspectId · `404` unknown case. If the case was already c
 
 ## 8. AI Behavior (Gemini integration)
 
-- Model: `gemini-2.5-flash` via `@google/genai`, `responseMimeType: "application/json"` **and** a strict `responseSchema` (structured output).
+- Model: Gemini flash family via `@google/genai`, `responseMimeType: "application/json"` **and** a strict `responseSchema` (structured output). Default `GEMINI_MODEL=gemini-flash-latest`; fallback chain `gemini-3.5-flash-lite` → `gemini-flash-lite-latest` absorbs 503/504 demand spikes.
 - System prompt: "The Architect" — a fair-play whodunit designer. Fair-play contract: every clue is honest, the culprit is always among the suspects, red herrings are plausible but clearable, no gore/realpeople, unique tone per generation.
 - Key output fields: `title, setting, victim, story, suspects[{name, role, description, alibi}], clues[{title, content}], hints[], culpritName, solution`.
 - Server-side **validation pipeline** (must pass before saving):

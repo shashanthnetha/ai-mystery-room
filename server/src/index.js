@@ -33,7 +33,7 @@ export function createApp() {
       success: true,
       status: 'ok',
       db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
       timestamp: new Date().toISOString(),
     });
   });
@@ -45,7 +45,7 @@ export function createApp() {
   return app;
 }
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5001;
 
 connectDB()
   .then(() => {

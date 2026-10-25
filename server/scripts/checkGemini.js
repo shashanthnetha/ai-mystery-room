@@ -26,7 +26,7 @@ const premise = process.argv[3] || 'A famous violinist is found dead in her lock
 console.log(`⏳ Asking Gemini for a ${cfg.label} mystery…`);
 
 const response = await ai.models.generateContent({
-  model: 'gemini-2.5-flash',
+  model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
   contents: `Design a complete murder-mystery case for AI Mystery Room. PLAYER'S PREMISE: """${premise}""" Difficulty: ${cfg.label} — exactly ${cfg.suspects} suspects, ${cfg.clues} clues, ${cfg.hints} hints. Return ONLY the structured JSON.`,
   config: {
     systemInstruction:

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Gavel, Ruler, X } from 'lucide-react';
 
 import { SuspectAvatar } from '../components/SuspectCard.jsx';

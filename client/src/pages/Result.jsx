@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, FileSearch, Home, PartyPopper, ScrollText } from 'lucide-react';
-
 import ErrorState from '../components/ErrorState.jsx';
 import Stamp from '../components/Stamp.jsx';
-import api, { apiCall, getErrorMessage } from '../lib/api.js';
+import api, { apiCall } from '../lib/api.js';
 import { DIFFICULTY_INFO } from '../lib/difficulty.js';
 import { updateCaseStatus } from '../lib/storage.js';
 
