@@ -1,0 +1,22 @@
+# Render blueprint — auto-configures the backend service.
+services:
+  - type: web
+    name: mystery-room-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      # Fill these in the Render dashboard after the first import:
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_URL
+        sync: false
