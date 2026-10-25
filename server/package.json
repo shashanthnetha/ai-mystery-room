@@ -1,0 +1,25 @@
+{
+  "name": "mystery-room-server",
+  "version": "1.0.0",
+  "description": "AI Mystery Room backend — Express + MongoDB + Gemini",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "check:gemini": "node scripts/checkGemini.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.31.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "mongoose": "^9.11.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
