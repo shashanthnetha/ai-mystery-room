@@ -73,7 +73,7 @@ hintPenalty   = −10 × hintsUsed
 score         = clamp(base + clueBonus + hintPenalty, min 0)
 ```
 Example (Medium, correct): 150 + (5 clues × 5) − (1 hint × 10) = **165**.
-A wrong accusation always scores 0.
+A wrong accusation earns no base points; clue bonuses and hint penalties still apply.
 
 ---
 
@@ -241,7 +241,7 @@ ai-mystery-room/
 - [ ] Undiscovered clue contents and unused hint texts are also never exposed.
 - [ ] Scores are computed **only** by the backend (base + clue bonus − hint penalty, floor 0) and shown with a breakdown.
 - [ ] Gemini failures/bad JSON are handled with retries (≤3) and a friendly error; input validation (10–400 chars, valid difficulty) with 400 + messages.
-- [ ] Results page displays the correct culprit + explanation; wrong accusation scores 0 and reveals the real culprit.
+- [ ] Results page displays the correct culprit + explanation; wrong accusation earns no base points and reveals the real culprit.
 - [ ] Re-visit URLs behave: unknown id → 404 page; completed case → results; resuming before completion → investigation room.
 - [ ] Responsive layout works on mobile; loading/error states on every page.
 - [ ] `npm run build` (client) passes; app works on the deployed site (Vercel + Render + Atlas).
