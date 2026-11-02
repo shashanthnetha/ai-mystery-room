@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, useEffect } from 'react';
 import { useLocation, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -42,6 +42,9 @@ class ErrorBoundary extends Component {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.main
