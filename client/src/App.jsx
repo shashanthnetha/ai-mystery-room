@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import Navbar from './components/Navbar.jsx';
@@ -45,27 +45,24 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.main
-        key={location.pathname.split('/').slice(0, 3).join('/')}
+        key={location.pathname}
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.28, ease: 'easeOut' }}
         className="flex min-h-[calc(100vh-4rem)] flex-col"
       >
-        <Routes location={location} />
+        <Routes location={location}>
+          <Route path="/" element={<Home />} />
+          <Route path="/create" element={<Create />} />
+          <Route path="/case/:id" element={<Case />} />
+          <Route path="/case/:id/accuse" element={<Accuse />} />
+          <Route path="/case/:id/result" element={<Result />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </motion.main>
     </AnimatePresence>
   );
-}
-
-function Routes({ location }) {
-  const path = location.pathname;
-  if (path === '/') return <Home />;
-  if (path === '/create') return <Create />;
-  if (/^\/case\/[^/]+\/accuse\/?$/.test(path)) return <Accuse />;
-  if (/^\/case\/[^/]+\/result\/?$/.test(path)) return <Result />;
-  if (/^\/case\/[^/]+\/?$/.test(path)) return <Case />;
-  return <NotFound />;
 }
 
 export default function App() {
