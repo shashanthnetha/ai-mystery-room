@@ -26,7 +26,7 @@ culprit. The culprit, solution, and scores live **only on the backend** until yo
 | Medium     | 4        | 7     | 3     | 150 pts            |
 | Hard       | 5        | 9     | 3     | 200 pts            |
 
-`score = clamp(base + 5 × cluesDiscovered − 10 × hintsUsed, min 0)` — a wrong accusation scores 0.
+`score = clamp(base + 5 × cluesDiscovered − 10 × hintsUsed, min 0)` — a wrong accusation earns no base points; clue bonuses and hint penalties still apply.
 
 ## Tech Stack
 
